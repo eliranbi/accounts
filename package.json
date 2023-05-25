@@ -1,0 +1,41 @@
+{
+  "name": "accountservices",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "dev": "nodemon"
+  },
+  "nodemonConfig": {
+    "watch": [
+      "src"
+    ],
+    "ext": "ts",
+    "exec": "ts-node src/server.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@fastify/swagger": "^8.5.1",
+    "@types/pg": "^8.10.1",
+    "axios": "^1.4.0",
+    "dotenv": "^16.0.3",
+    "ethereumjs-wallet": "^1.0.2",
+    "ethers": "^6.4.0",
+    "fastify": "^4.17.0",
+    "fastify-cors": "^6.1.0",
+    "nodemon": "^2.0.22",
+    "pg": "^8.11.0",
+    "typescript": "^5.0.4"
+  },
+  "dependencies": {
+    "@fastify/cors": "^8.2.1",
+    "@fastify/swagger-ui": "^1.8.1",
+    "fastify-swagger": "^5.2.0",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^4.6.3"
+  }
+}
