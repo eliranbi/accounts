@@ -4,7 +4,6 @@ import fastifyCors from '@fastify/cors';
 import fastifySwagger from '@fastify/swagger';
 require('dotenv').config();
 import axios from 'axios';
-
 import Fastify, { FastifyInstance, RouteShorthandOptions } from 'fastify'
 import { Server, IncomingMessage, ServerResponse } from 'http'
 
@@ -53,13 +52,13 @@ server.get('/accounts/:accountId',  async (request, reply) => {
     // Access the rows returned by the query
     const rows = result.rows;
     if(rows == null || rows.length <=0){
-        throw {status : 500 , message : 'Account does not exist'}
+        throw {status : 400 , message : 'Account does not exist'}
     }
     console.log(rows);
     reply.send(rows[0])
   } catch (e) {
     console.error('Error reading data:', e);
-    reply.status(500).send({ error: (e as Error).message });
+    reply.status(400).send({ error: (e as Error).message });
   }
 });
 
@@ -73,11 +72,11 @@ server.post('/accounts', async (request, reply) => {
         const { rows } = await client.query('SELECT * FROM accounts WHERE accountId = $1', [accountId])        
         if (rows.length > 0){
             console.log('account:', rows[0])
-            throw {status : 500 , message : 'Error account already exist'}
+            throw {status : 400 , message : 'Error account already exist'}
         }
     } catch (error) {
         console.error('Error account already exist :', error);
-        throw {status : 500 , message : 'Error account already exist'}
+        throw {status : 400 , message : 'Error account already exist'}
       }
 
     // Call wallet api to get walletId and address ... 
@@ -98,7 +97,7 @@ server.post('/accounts', async (request, reply) => {
 
     }catch(error){
         console.error('Error creatting wallet:', error);
-        throw {status : 500 , message : 'Error creatting wallet'}
+        throw {status : 400 , message : 'Error creatting wallet'}
     }
     
     reply.send({ message: 'Data inserted successfully!' });
@@ -106,24 +105,28 @@ server.post('/accounts', async (request, reply) => {
   } catch (e) {
     console.error(e);
     console.error('Error writing data:', e);
-    reply.status(500).send({ error: (e as Error).message });
+    reply.status(400).send({ error: (e as Error).message });
   }
 });
 
-// Start the server
-const start = async () => {
-    try {
-      await server.listen({ port: 3000 })  
-      const address = server.server.address()
-      const port = typeof address === 'string' ? address : address?.port
-    } catch (err) {
-      server.log.error(err)
-      process.exit(1)
+//adding swagger
+server.register(require('@fastify/swagger'), {
+    mode: 'static',
+    specification:{
+        path: '../swagger-static-specification.json'
     }
+})
+
+server.register(require('./swagger'))
+
+try {
+    server.listen({ port: 3000 }, (err) => {
+    if (err) throw err
+    })
+} catch (err) {
+    server.log.error(err)
+    process.exit(1)
   }
-  start()
-
-
 
 
 

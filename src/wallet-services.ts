@@ -47,7 +47,7 @@ server.get('/wallet/:address',  async (request, reply) => {
     reply.send(wallet)
   } catch (error) {
     console.error('Error reading data:', error);
-    reply.status(500).send({ error: 'Error reading data' });
+    reply.status(400).send({ error: 'Error reading data' });
   }
 });
 
@@ -81,7 +81,7 @@ server.post('/wallet', async (request, reply) => {
 
 } catch (error) {
     console.error('Error writing data:', error);
-    reply.status(500).send({ error: 'Error writing data' });
+    reply.status(400).send({ error: 'Error writing data' });
   }
 });
 

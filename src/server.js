@@ -78,7 +78,7 @@ server.get('/accounts/:accountId', function (request, reply) { return __awaiter(
                 result = _a.sent();
                 rows = result.rows;
                 if (rows == null || rows.length <= 0) {
-                    throw { status: 500, message: 'Account does not exist' };
+                    throw { status: 400, message: 'Account does not exist' };
                 }
                 console.log(rows);
                 reply.send(rows[0]);
@@ -86,7 +86,7 @@ server.get('/accounts/:accountId', function (request, reply) { return __awaiter(
             case 2:
                 e_1 = _a.sent();
                 console.error('Error reading data:', e_1);
-                reply.status(500).send({ error: e_1.message });
+                reply.status(400).send({ error: e_1.message });
                 return [3 /*break*/, 3];
             case 3: return [2 /*return*/];
         }
@@ -110,13 +110,13 @@ server.post('/accounts', function (request, reply) { return __awaiter(void 0, vo
                 rows = (_b.sent()).rows;
                 if (rows.length > 0) {
                     console.log('account:', rows[0]);
-                    throw { status: 500, message: 'Error account already exist' };
+                    throw { status: 400, message: 'Error account already exist' };
                 }
                 return [3 /*break*/, 4];
             case 3:
                 error_1 = _b.sent();
                 console.error('Error account already exist :', error_1);
-                throw { status: 500, message: 'Error account already exist' };
+                throw { status: 400, message: 'Error account already exist' };
             case 4:
                 // Call wallet api to get walletId and address ... 
                 console.log(">>> calling wallet services ...");
@@ -138,7 +138,7 @@ server.post('/accounts', function (request, reply) { return __awaiter(void 0, vo
             case 8:
                 error_2 = _b.sent();
                 console.error('Error creatting wallet:', error_2);
-                throw { status: 500, message: 'Error creatting wallet' };
+                throw { status: 400, message: 'Error creatting wallet' };
             case 9:
                 reply.send({ message: 'Data inserted successfully!' });
                 return [3 /*break*/, 11];
@@ -146,32 +146,27 @@ server.post('/accounts', function (request, reply) { return __awaiter(void 0, vo
                 e_2 = _b.sent();
                 console.error(e_2);
                 console.error('Error writing data:', e_2);
-                reply.status(500).send({ error: e_2.message });
+                reply.status(400).send({ error: e_2.message });
                 return [3 /*break*/, 11];
             case 11: return [2 /*return*/];
         }
     });
 }); });
-// Start the server
-var start = function () { return __awaiter(void 0, void 0, void 0, function () {
-    var address, port, err_1;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                _a.trys.push([0, 2, , 3]);
-                return [4 /*yield*/, server.listen({ port: 3000 })];
-            case 1:
-                _a.sent();
-                address = server.server.address();
-                port = typeof address === 'string' ? address : address === null || address === void 0 ? void 0 : address.port;
-                return [3 /*break*/, 3];
-            case 2:
-                err_1 = _a.sent();
-                server.log.error(err_1);
-                process.exit(1);
-                return [3 /*break*/, 3];
-            case 3: return [2 /*return*/];
-        }
+//adding swagger
+server.register(require('@fastify/swagger'), {
+    mode: 'static',
+    specification: {
+        path: '../swagger-static-specification.json'
+    }
+});
+server.register(require('./swagger'));
+try {
+    server.listen({ port: 3000 }, function (err) {
+        if (err)
+            throw err;
     });
-}); };
-start();
+}
+catch (err) {
+    server.log.error(err);
+    process.exit(1);
+}
