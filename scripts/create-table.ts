@@ -1,21 +1,27 @@
 import { Client } from 'pg';
-require('dotenv').config();
+import * as dotenv from "dotenv";
+dotenv.config({ path: __dirname+'/.env' });
 
 const {
     DB_USER,
     DB_HOST,
     DB_DATABASE,
-    DB_PASSWORD,
-    DB_PORT,
+    DB_PASSWORD
   } = process.env;
   
+console.log("******************\n db connection *********************");
+console.log("DB_USER: " + DB_USER);
+console.log("DB_HOST: " + DB_HOST);
+console.log("DB_DATABASE: " + DB_DATABASE);
+console.log("DB_PASSWORD: " + DB_PASSWORD);
+
   // Create a new PostgreSQL client
   const client = new Client({
     user: DB_USER,
     host: DB_HOST,
     database: DB_DATABASE,
     password: DB_PASSWORD,
-    port: DB_PORT,
+    port: 5432,
   });
 
 
@@ -25,45 +31,46 @@ client.connect();
 // Function to create the table
 async function createAccountTable() {
   try {
+    // Drop account table 
+    const dropTableQuery = `DROP TABLE IF EXISTS accounts;`;
+    await client.query(dropTableQuery);
     // Create the 'accounts' table
-    await client.query(`
-      CREATE TABLE accounts (
-        accountId VARCHAR PRIMARY KEY,
+    await client.query(
+      `CREATE TABLE accounts (
+        accountId VARCHAR,
         accountName VARCHAR,
+        investorId VARCHAR,
         walletId VARCHAR,
         address VARCHAR,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (accountId, investorId),
+        FOREIGN KEY (investorId) REFERENCES investors (investorId)        
+      )`);
 
-    console.log('Table created successfully!');
+    console.log('accounts table created successfully!');
   } catch (error) {
     console.error('Error creating table:', error);
-  } finally {
-    // Close the client connection
-    //client.end();
-  }
+  } 
 }
 
   async function inserToAccountTable() {
-    try {
+    try {      
       // inserToAccountTable
       await client.query(
-        `INSERT INTO accounts (accountId, accountName,walletId, address) VALUES ($1, $2, $3, $4)`,
-        ['0001001', 'acct1001', '00001', '0x012020fhe03999djs99k002920343jd']
+        `INSERT INTO accounts (accountId, investorId, accountName, walletId, address) VALUES ($1, $2, $3, $4, $5)`,
+        ['0001001', 'I0001001', 'acct1001','wallet1001', '0x012020fhe03999djs99k002920343jd']
       );
       console.log('insert successfully!');
     } catch (error) {
       console.error('Error creating table:', error);
-    } finally {
-      // Close the client connection
-      client.end();
     }
   }
 
   async function createWalletTable() {
     try {
       // Create the 'wallets' table
+      const dropTableQuery = `DROP TABLE IF EXISTS wallets;`;
+      await client.query(dropTableQuery);
       await client.query(`
         CREATE TABLE wallets (
           walletId VARCHAR PRIMARY KEY,
@@ -76,9 +83,6 @@ async function createAccountTable() {
       console.log('wallets table created successfully!');
     } catch (error) {
       console.error('Error creating table:', error);
-    } finally {
-      // Close the client connection
-      //client.end();
     }
   }
 
@@ -97,16 +101,62 @@ async function createAccountTable() {
       console.log('insert successfully!');
     } catch (error) {
       console.error('Error creating table:', error);
-    } finally {
-      // Close the client connection
-      client.end();
     }
   }
   
 
-// Call the function to create the table
-//createAccountTable();
-//inserToAccountTable();
-createWalletTable();
-inserToWalletTable();
+//Function to create the investor table
+async function createInvestorTable() {
+  try {
+    // Create the 'investors' table
+  
+    const alterTableQuery = `ALTER TABLE accounts DROP CONSTRAINT accounts_investorid_fkey;`
+    const dropTableQuery = `DROP TABLE IF EXISTS investors;`;
+    await client.query(alterTableQuery);
+    await client.query(dropTableQuery);
+
+    await client.query(`
+      CREATE TABLE investors (
+        investorId VARCHAR PRIMARY KEY,
+        investorName VARCHAR,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )`
+    );
+    console.log('Investor table created successfully!');
+  } catch (error) {
+    console.error('Error creating investor table:', error);
+  } 
+}
+
+async function inserToInvestorTable() {
+  try {
+    // inserToAccountTable
+    await client.query(
+      `INSERT INTO investors (investorId, investorName) VALUES ($1, $2)`,
+      ['I0001001', 'inv1001']
+    );
+    console.log('insert successfully!');
+  } catch (error) {
+    console.error('Error creating table:', error);
+  } 
+}
+
+
+async function runTableCreation(){
+  await createInvestorTable();
+  await createAccountTable();
+  await createWalletTable();
+}
+
+async function testTableInserts(){
+  await inserToInvestorTable();
+  await inserToAccountTable();
+  await inserToWalletTable();
+}
+ 
+runTableCreation();
+//testTableInserts();
+
+
+
 

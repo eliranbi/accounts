@@ -1,11 +1,11 @@
 import { Client } from 'pg';
-//import fastify from 'fastify';
+
 import fastifyCors from '@fastify/cors';
-import fastifySwagger from '@fastify/swagger';
-require('dotenv').config();
+import * as dotenv from "dotenv";
+dotenv.config({ path: __dirname+'/.env' });
 import axios from 'axios';
-import Fastify, { FastifyInstance, RouteShorthandOptions } from 'fastify'
-import { Server, IncomingMessage, ServerResponse } from 'http'
+import Fastify, { FastifyInstance } from 'fastify'
+
 
 
 
@@ -14,7 +14,6 @@ const {
     DB_HOST,
     DB_DATABASE,
     DB_PASSWORD,
-    DB_PORT,
     WALLET_SERVICES_URL,
   } = process.env;
   
@@ -37,8 +36,84 @@ server.register(fastifyCors);
 
 server.get('/ping', async (request, reply) => {
     console.log(">>> in ping ...");
-    return { pong: 'it worked!' }
+
+    return { message: 'account services is up - ' + new Date() }
 })
+
+
+//Get - Investor information 
+server.get('/investors/:investorId',  async (request, reply) => {
+  try {
+    console.log(">>> in investors ...");
+    const { investorId } = request.params as { investorId: string };
+    console.log(request.params);
+
+    // Execute a query to select data from a table
+    const result = await client.query('SELECT * FROM investors WHERE investorId = $1',[investorId]);
+    // Access the rows returned by the query
+    const rows = result.rows;
+    if(rows == null || rows.length <=0){
+        throw {status : 400 , message : 'Investor does not exist'}
+    }
+    console.log(rows);
+    reply.send(rows[0])
+  } catch (e) {
+    console.error('Error reading data:', e);
+    reply.status(400).send({ error: (e as Error).message });
+  }
+});
+
+//GET - Investor accounts 
+server.get('/investors/accounts/:investorId',  async (request, reply) => {
+  try {
+    console.log(">>> in investors ...");
+    const { investorId } = request.params as { investorId: string };
+    console.log(request.params);
+
+    // Execute a query to select data from a table
+    const result = await client.query('SELECT * FROM accounts WHERE investorId = $1',[investorId]);
+    // Access the rows returned by the query
+    const rows = result.rows;
+    if(rows == null || rows.length <=0){
+        throw {status : 400 , message : 'No account for investor'}
+    }
+    console.log(rows);
+    reply.send(rows)
+  } catch (e) {
+    console.error('Error reading data:', e);
+    reply.status(400).send({ error: (e as Error).message });
+  }
+});
+
+//POST - Create investor 
+server.post('/investors', async (request, reply) => {
+  try {
+    console.log(">>> in investors/create ...");
+    console.log(request.body);
+    const { investorId, investorName} = request.body as { investorId: string, investorName: string };
+    try {
+        const { rows } = await client.query('SELECT * FROM investors WHERE investorId = $1', [investorId])        
+        if (rows.length > 0){
+            console.log('account:', rows[0])
+            throw {status : 400 , message : 'Error investor already exist'}
+        }
+    } catch (error) {
+        console.error('Error investorId already exist :', error);
+        throw {status : 400 , message : 'Error investor already exist'}
+    }
+
+    await client.query(
+        `INSERT INTO investors (investorId, investorName) VALUES ($1, $2)`,
+        [investorId, investorName]
+    ); 
+    reply.send({ message: 'Data inserted successfully!' });
+  } catch (e) {
+    console.error(e);
+    console.error('Error writing data:', e);
+    reply.status(400).send({ error: (e as Error).message });
+  }
+});
+
 
 // GET route to read data from PostgreSQL
 server.get('/accounts/:accountId',  async (request, reply) => {
@@ -62,12 +137,23 @@ server.get('/accounts/:accountId',  async (request, reply) => {
   }
 });
 
-// POST route to write data to PostgreSQL
+// POST - Create an account
 server.post('/accounts', async (request, reply) => {
   try {
     console.log(">>> in accounts/create ...");
     console.log(request.body);
-    const { accountId, accountName} = request.body as { accountId: string, accountName: string };
+    const { accountId, accountName, investorId} = request.body as { accountId: string, accountName: string, investorId: string };
+    
+    try {
+      const { rows } = await client.query('SELECT * FROM investors WHERE investorId = $1', [investorId])        
+      if (rows.length <= 0){          
+          throw {status : 400 , message : 'Please create investor account first'}
+      }
+  } catch (error) {
+      console.error('Error investorId does not exist :', error);
+      throw {status : 400 , message : 'Error investorId does not exist - Please create investor first'}
+  }
+
     try {
         const { rows } = await client.query('SELECT * FROM accounts WHERE accountId = $1', [accountId])        
         if (rows.length > 0){
@@ -77,7 +163,7 @@ server.post('/accounts', async (request, reply) => {
     } catch (error) {
         console.error('Error account already exist :', error);
         throw {status : 400 , message : 'Error account already exist'}
-      }
+    }
 
     // Call wallet api to get walletId and address ... 
     console.log(">>> calling wallet services ...");
@@ -91,8 +177,8 @@ server.post('/accounts', async (request, reply) => {
         console.log(">>> saving new account to database ...");    
         // Execute a query to insert data into a table
         await client.query(
-        `INSERT INTO accounts (accountId, accountName, walletId, address) VALUES ($1, $2, $3, $4)`,
-        [accountId, accountName, wallet.data.walletId, wallet.data.address]
+        `INSERT INTO accounts (accountId, accountName, investorId, walletId, address) VALUES ($1, $2, $3, $4, $5)`,
+        [accountId, accountName, investorId, wallet.data.walletId, wallet.data.address]
         );
 
     }catch(error){
@@ -113,7 +199,7 @@ server.post('/accounts', async (request, reply) => {
 server.register(require('@fastify/swagger'), {
     mode: 'static',
     specification:{
-        path: '../swagger-static-specification.json'
+        path: __dirname + '/swagger-static-specification.json'
     }
 })
 

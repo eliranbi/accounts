@@ -40,8 +40,10 @@ var pg_1 = require("pg");
 var cors_1 = require("@fastify/cors");
 var fastify_1 = require("fastify");
 var ethereumjs_wallet_1 = require("ethereumjs-wallet");
-require('dotenv').config();
-var _a = process.env, DB_USER = _a.DB_USER, DB_HOST = _a.DB_HOST, DB_DATABASE = _a.DB_DATABASE, DB_PASSWORD = _a.DB_PASSWORD, DB_PORT = _a.DB_PORT;
+//require('dotenv').config();
+var dotenv = require("dotenv");
+dotenv.config({ path: __dirname + '/.env' });
+var _a = process.env, DB_USER = _a.DB_USER, DB_HOST = _a.DB_HOST, DB_DATABASE = _a.DB_DATABASE, DB_PASSWORD = _a.DB_PASSWORD;
 // Create a new PostgreSQL client
 var client = new pg_1.Client({
     user: DB_USER,
@@ -78,7 +80,7 @@ server.get('/wallet/:address', function (request, reply) { return __awaiter(void
         }
         catch (error) {
             console.error('Error reading data:', error);
-            reply.status(500).send({ error: 'Error reading data' });
+            reply.status(400).send({ error: 'Error reading data' });
         }
         return [2 /*return*/];
     });
@@ -112,7 +114,7 @@ server.post('/wallet', function (request, reply) { return __awaiter(void 0, void
             case 2:
                 error_1 = _a.sent();
                 console.error('Error writing data:', error_1);
-                reply.status(500).send({ error: 'Error writing data' });
+                reply.status(400).send({ error: 'Error writing data' });
                 return [3 /*break*/, 3];
             case 3: return [2 /*return*/];
         }

@@ -1,0 +1,319 @@
+{
+  
+
+  "swagger": "2.0",
+  "info": {
+      "description": "Accounts Resolution Services API",
+      "version": "1.0.6",
+      "title": "Swagger Account Services",
+      "termsOfService": "http://swagger.io/terms/",
+      "contact": {
+          "email": "ebenishay@statestreet.com"
+      },
+      "license": {
+          "name": "Apache 2.0",
+          "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+      }
+  },
+  
+  "tags": [      
+      {
+          "name": "account",
+          "description": "Account object"
+      }
+  ],
+  "schemes": [      
+      "http"
+  ],
+
+  "host": "localhost:3000",    
+
+  "paths": {
+    "/ping": {
+      "get": {
+        "description": "Status route, so we can check if server is alive",
+        "tags": [
+          "Ping"
+        ],
+        "responses": {
+          "200": {
+            "description": "Server is alive",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "health": {
+                      "type": "boolean"
+                    },
+                    "date": {
+                      "type": "string"
+                    }
+                  },
+                  "example": {
+                    "health": true,
+                    "date": "2018-02-19T15:36:46.758Z"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }      
+    },  
+    "/accounts" : {
+        "post" : {
+            "summary" : "Create new account",
+            "description": "Create new account",
+            "tags": [
+              "Accounts"
+            ],
+            "produces": ["application/json"],
+            "consumes": ["application/json"],
+            "parameters": [
+                {
+                    "in": "body",
+                    "name": "body",
+                    "description": "account create object",
+                    "required": true,
+                    "schema": {
+                        "$ref": "#/definitions/accountRequestBody"                                                    
+                    }
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "successful operation",
+                    "schema": {                        
+                            "$ref": "#/definitions/successfulResponse"                        
+                    }
+                },
+                "400": {
+                    "description": "Invalid status value",
+                    "schema": {
+                        "$ref": "#/definitions/invalidResponse"
+                    }
+                }
+            }
+        }
+    },
+    "/accounts/{accountId}" : {
+        "get" : {
+            "summary" : "Get account",
+            "description": "Get account",
+            "tags": [
+              "Accounts"
+            ],
+            "produces": ["application/json"],
+            "parameters": [
+                {
+                    "name": "accountId",
+                    "in": "path",
+                    "description": "AccountId to get",
+                    "required": true,
+                    "type": "string",
+                    "example": "00019918321"
+                }                
+            ],
+            "responses": {
+                "200": {
+                    "description": "successful operation",
+                    "schema": {
+                        "type": "object",
+                        "items": {
+                            "$ref": "#/definitions/account"
+                        }
+                    }
+                },
+                "400": {
+                    "description": "Invalid status value",
+                    "schema": {
+                        "$ref": "#/definitions/invalidResponse"
+                    }
+                }
+            }
+        }
+    },  
+    "/investors" : {
+        "post" : {
+            "summary" : "Create new investor",
+            "description": "Create new investor",
+            "tags": [
+              "Investors"
+            ],
+            "produces": ["application/json"],
+            "consumes": ["application/json"],
+            "parameters": [
+                {
+                    "in": "body",
+                    "name": "body",
+                    "description": "investor create object",
+                    "required": true,
+                    "schema": {
+                        "$ref": "#/definitions/investorRequestBody"                                                    
+                    }
+                }
+            ],
+            "responses": {
+                "200": {
+                    "description": "successful operation",
+                    "schema": {                        
+                            "$ref": "#/definitions/successfulResponse"                        
+                    }
+                },
+                "400": {
+                    "description": "Invalid status value",
+                    "schema": {
+                        "$ref": "#/definitions/invalidResponse"
+                    }
+                }
+            }
+        }
+    },
+    "/investors/{investorId}" : {
+        "get" : {
+            "summary" : "Get investor",
+            "description": "Get investor",
+            "tags": [
+              "Investors"
+            ],
+            "produces": ["application/json"],
+            "parameters": [
+                {
+                    "name": "investorId",
+                    "in": "path",
+                    "description": "InvestorId to get",
+                    "required": true,
+                    "type": "string",
+                    "example": "INV00019918321"
+                }                
+            ],
+            "responses": {
+                "200": {
+                    "description": "successful operation",
+                    "schema": {
+                        "type": "object",
+                        "items": {
+                            "$ref": "#/definitions/investor"
+                        }
+                    }
+                },
+                "400": {
+                    "description": "Invalid status value",
+                    "schema": {
+                        "$ref": "#/definitions/invalidResponse"
+                    }
+                }
+            }
+        }
+    },
+    "/investors/accounts/{investorId}" : {
+        "get" : {
+            "summary" : "Get investor accounts",
+            "description": "Get investor accounts",
+            "tags": [
+              "Investors"
+            ],
+            "produces": ["application/json"],
+            "parameters": [
+                {
+                    "name": "investorId",
+                    "in": "path",
+                    "description": "InvestorId to get",
+                    "required": true,
+                    "type": "string",
+                    "example": "INV00019918321"
+                }                
+            ],
+            "responses": {
+                "200": {
+                    "description": "successful operation",
+                    "schema": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/definitions/account"
+                        }
+                    }
+                },
+                "400": {
+                    "description": "Invalid status value",
+                    "schema": {
+                        "$ref": "#/definitions/invalidResponse"
+                    }
+                }
+            }
+        }
+    }
+  },"definitions": {
+    "account": {
+        "type": "object",
+        "properties": {
+            "accountId": { "type": "integer" },
+            "accountName": { "type": "string" },
+            "investorId": { "type": "string" },
+            "walletId": { "type": "string" },
+            "address": { "type": "string" },
+            "createAt": { "type": "string" }
+        }
+    },
+    "investor": {
+        "type": "object",
+        "properties": {
+            "investorId": { "type": "integer" },
+            "investorName": { "type": "string" },
+            "createAt": { "type": "string" }
+        }
+    },
+    "accountRequestBody": {
+        "x-name": "body", 
+        "type": "object",
+        "required": [
+          "accountId"          
+       ],
+        "properties": {
+            "accountId": {
+                "type": "string",
+                "example": "00019918321"
+            },
+            "accountName": {
+                "type": "string",
+                "example": "STT MMF Account"
+            },
+            "investorId": {
+                "type": "string",
+                "example": "INV00019918321"
+            }
+        }
+    },
+    "investorRequestBody": {
+        "x-name": "body", 
+        "type": "object",
+        "required": [
+          "investorId"          
+       ],
+        "properties": {
+            "investorId": {
+                "type": "string",
+                "example": "INV00019918321"
+            },
+            "investorName": {
+                "type": "string",
+                "example": "STT MMF Investor"
+            }
+        }
+    },
+    "invalidResponse": {
+        "type": "object",
+        "properties": {
+            "status": { "type": "string" },
+            "message": { "type": "string" }
+        }
+
+    },"successfulResponse": {
+      "type": "object",
+      "properties": {          
+          "message": { "type": "string" }
+      }
+    }
+  } 
+}

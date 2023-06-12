@@ -37,38 +37,47 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var pg_1 = require("pg");
-require('dotenv').config();
-var _a = process.env, DB_USER = _a.DB_USER, DB_HOST = _a.DB_HOST, DB_DATABASE = _a.DB_DATABASE, DB_PASSWORD = _a.DB_PASSWORD, DB_PORT = _a.DB_PORT;
+var dotenv = require("dotenv");
+dotenv.config({ path: __dirname + '/.env' });
+var _a = process.env, DB_USER = _a.DB_USER, DB_HOST = _a.DB_HOST, DB_DATABASE = _a.DB_DATABASE, DB_PASSWORD = _a.DB_PASSWORD;
+console.log("******************\n db connection *********************");
+console.log("DB_USER: " + DB_USER);
+console.log("DB_HOST: " + DB_HOST);
+console.log("DB_DATABASE: " + DB_DATABASE);
+console.log("DB_PASSWORD: " + DB_PASSWORD);
 // Create a new PostgreSQL client
 var client = new pg_1.Client({
     user: DB_USER,
     host: DB_HOST,
     database: DB_DATABASE,
     password: DB_PASSWORD,
-    port: DB_PORT,
+    port: 5432,
 });
 // Connect to the PostgreSQL server
 client.connect();
 // Function to create the table
 function createAccountTable() {
     return __awaiter(this, void 0, void 0, function () {
-        var error_1;
+        var dropTableQuery, error_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 2, 3, 4]);
-                    // Create the 'accounts' table
-                    return [4 /*yield*/, client.query("\n      CREATE TABLE accounts (\n        accountId VARCHAR PRIMARY KEY,\n        accountName VARCHAR,\n        walletId VARCHAR,\n        address VARCHAR,\n        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n      )\n    ")];
+                    _a.trys.push([0, 3, , 4]);
+                    dropTableQuery = "DROP TABLE IF EXISTS accounts;";
+                    return [4 /*yield*/, client.query(dropTableQuery)];
                 case 1:
+                    _a.sent();
+                    // Create the 'accounts' table
+                    return [4 /*yield*/, client.query("CREATE TABLE accounts (\n        accountId VARCHAR,\n        accountName VARCHAR,\n        investorId VARCHAR,\n        walletId VARCHAR,\n        address VARCHAR,\n        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n        PRIMARY KEY (accountId, investorId),\n        FOREIGN KEY (investorId) REFERENCES investors (investorId)        \n      )")];
+                case 2:
                     // Create the 'accounts' table
                     _a.sent();
-                    console.log('Table created successfully!');
+                    console.log('accounts table created successfully!');
                     return [3 /*break*/, 4];
-                case 2:
+                case 3:
                     error_1 = _a.sent();
                     console.error('Error creating table:', error_1);
                     return [3 /*break*/, 4];
-                case 3: return [7 /*endfinally*/];
                 case 4: return [2 /*return*/];
             }
         });
@@ -80,46 +89,43 @@ function inserToAccountTable() {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 2, 3, 4]);
+                    _a.trys.push([0, 2, , 3]);
                     // inserToAccountTable
-                    return [4 /*yield*/, client.query("INSERT INTO accounts (accountId, accountName,walletId, address) VALUES ($1, $2, $3, $4)", ['0001001', 'acct1001', '00001', '0x012020fhe03999djs99k002920343jd'])];
+                    return [4 /*yield*/, client.query("INSERT INTO accounts (accountId, investorId, accountName, walletId, address) VALUES ($1, $2, $3, $4, $5)", ['0001001', 'I0001001', 'acct1001', 'wallet1001', '0x012020fhe03999djs99k002920343jd'])];
                 case 1:
                     // inserToAccountTable
                     _a.sent();
                     console.log('insert successfully!');
-                    return [3 /*break*/, 4];
+                    return [3 /*break*/, 3];
                 case 2:
                     error_2 = _a.sent();
                     console.error('Error creating table:', error_2);
-                    return [3 /*break*/, 4];
-                case 3:
-                    // Close the client connection
-                    client.end();
-                    return [7 /*endfinally*/];
-                case 4: return [2 /*return*/];
+                    return [3 /*break*/, 3];
+                case 3: return [2 /*return*/];
             }
         });
     });
 }
 function createWalletTable() {
     return __awaiter(this, void 0, void 0, function () {
-        var error_3;
+        var dropTableQuery, error_3;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 2, 3, 4]);
-                    // Create the 'wallets' table
-                    return [4 /*yield*/, client.query("\n        CREATE TABLE wallets (\n          walletId VARCHAR PRIMARY KEY,\n          privateKey VARCHAR,          \n          address VARCHAR,\n          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n        )\n      ")];
+                    _a.trys.push([0, 3, , 4]);
+                    dropTableQuery = "DROP TABLE IF EXISTS wallets;";
+                    return [4 /*yield*/, client.query(dropTableQuery)];
                 case 1:
-                    // Create the 'wallets' table
+                    _a.sent();
+                    return [4 /*yield*/, client.query("\n        CREATE TABLE wallets (\n          walletId VARCHAR PRIMARY KEY,\n          privateKey VARCHAR,          \n          address VARCHAR,\n          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n        )\n      ")];
+                case 2:
                     _a.sent();
                     console.log('wallets table created successfully!');
                     return [3 /*break*/, 4];
-                case 2:
+                case 3:
                     error_3 = _a.sent();
                     console.error('Error creating table:', error_3);
                     return [3 /*break*/, 4];
-                case 3: return [7 /*endfinally*/];
                 case 4: return [2 /*return*/];
             }
         });
@@ -131,7 +137,7 @@ function inserToWalletTable() {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 2, 3, 4]);
+                    _a.trys.push([0, 2, , 3]);
                     walletId = '265526';
                     privateKey = '0x421273a2caec0e0b542eb3bcc1c7d5c0769b5227b4f61fa2003c8a714c370402';
                     address = '0xf5c8552afc99a19b8ceaf092d2db58cb9b2e950a';
@@ -141,22 +147,104 @@ function inserToWalletTable() {
                     // inserToWalletTable
                     _a.sent();
                     console.log('insert successfully!');
-                    return [3 /*break*/, 4];
+                    return [3 /*break*/, 3];
                 case 2:
                     error_4 = _a.sent();
                     console.error('Error creating table:', error_4);
-                    return [3 /*break*/, 4];
-                case 3:
-                    // Close the client connection
-                    client.end();
-                    return [7 /*endfinally*/];
-                case 4: return [2 /*return*/];
+                    return [3 /*break*/, 3];
+                case 3: return [2 /*return*/];
             }
         });
     });
 }
-// Call the function to create the table
-//createAccountTable();
-//inserToAccountTable();
-createWalletTable();
-inserToWalletTable();
+//Function to create the investor table
+function createInvestorTable() {
+    return __awaiter(this, void 0, void 0, function () {
+        var alterTableQuery, dropTableQuery, error_5;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    _a.trys.push([0, 4, , 5]);
+                    alterTableQuery = "ALTER TABLE accounts DROP CONSTRAINT accounts_investorid_fkey;";
+                    dropTableQuery = "DROP TABLE IF EXISTS investors;";
+                    return [4 /*yield*/, client.query(alterTableQuery)];
+                case 1:
+                    _a.sent();
+                    return [4 /*yield*/, client.query(dropTableQuery)];
+                case 2:
+                    _a.sent();
+                    return [4 /*yield*/, client.query("\n      CREATE TABLE investors (\n        investorId VARCHAR PRIMARY KEY,\n        investorName VARCHAR,\n        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n      )")];
+                case 3:
+                    _a.sent();
+                    console.log('Investor table created successfully!');
+                    return [3 /*break*/, 5];
+                case 4:
+                    error_5 = _a.sent();
+                    console.error('Error creating investor table:', error_5);
+                    return [3 /*break*/, 5];
+                case 5: return [2 /*return*/];
+            }
+        });
+    });
+}
+function inserToInvestorTable() {
+    return __awaiter(this, void 0, void 0, function () {
+        var error_6;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    _a.trys.push([0, 2, , 3]);
+                    // inserToAccountTable
+                    return [4 /*yield*/, client.query("INSERT INTO investors (investorId, investorName) VALUES ($1, $2)", ['I0001001', 'inv1001'])];
+                case 1:
+                    // inserToAccountTable
+                    _a.sent();
+                    console.log('insert successfully!');
+                    return [3 /*break*/, 3];
+                case 2:
+                    error_6 = _a.sent();
+                    console.error('Error creating table:', error_6);
+                    return [3 /*break*/, 3];
+                case 3: return [2 /*return*/];
+            }
+        });
+    });
+}
+function runTableCreation() {
+    return __awaiter(this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, createInvestorTable()];
+                case 1:
+                    _a.sent();
+                    return [4 /*yield*/, createAccountTable()];
+                case 2:
+                    _a.sent();
+                    return [4 /*yield*/, createWalletTable()];
+                case 3:
+                    _a.sent();
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+function testTableInserts() {
+    return __awaiter(this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, inserToInvestorTable()];
+                case 1:
+                    _a.sent();
+                    return [4 /*yield*/, inserToAccountTable()];
+                case 2:
+                    _a.sent();
+                    return [4 /*yield*/, inserToWalletTable()];
+                case 3:
+                    _a.sent();
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+//runTableCreation();
+testTableInserts();

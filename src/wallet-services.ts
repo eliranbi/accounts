@@ -2,14 +2,16 @@ import { Client } from 'pg';
 import fastifyCors from '@fastify/cors';
 import Fastify, { FastifyInstance, RouteShorthandOptions } from 'fastify'
 import ethWallet from 'ethereumjs-wallet'
-require('dotenv').config();
+
+import * as dotenv from "dotenv";
+dotenv.config({ path: __dirname+'/.env' });
+
 
 const {
     DB_USER,
     DB_HOST,
     DB_DATABASE,
-    DB_PASSWORD,
-    DB_PORT,
+    DB_PASSWORD
   } = process.env;
   
   // Create a new PostgreSQL client
