@@ -41,30 +41,9 @@ server.get('/ping', async (request, reply) => {
 })
 
 
-//Get - Investor information 
-server.get('/investors/:investorId',  async (request, reply) => {
-  try {
-    console.log(">>> in investors ...");
-    const { investorId } = request.params as { investorId: string };
-    console.log(request.params);
-
-    // Execute a query to select data from a table
-    const result = await client.query('SELECT * FROM investors WHERE investorId = $1',[investorId]);
-    // Access the rows returned by the query
-    const rows = result.rows;
-    if(rows == null || rows.length <=0){
-        throw {status : 400 , message : 'Investor does not exist'}
-    }
-    console.log(rows);
-    reply.send(rows[0])
-  } catch (e) {
-    console.error('Error reading data:', e);
-    reply.status(400).send({ error: (e as Error).message });
-  }
-});
 
 //GET - Investor accounts 
-server.get('/investors/accounts/:investorId',  async (request, reply) => {
+server.get('/accounts/investors/:investorId',  async (request, reply) => {
   try {
     console.log(">>> in investors ...");
     const { investorId } = request.params as { investorId: string };
@@ -81,35 +60,6 @@ server.get('/investors/accounts/:investorId',  async (request, reply) => {
     reply.send(rows)
   } catch (e) {
     console.error('Error reading data:', e);
-    reply.status(400).send({ error: (e as Error).message });
-  }
-});
-
-//POST - Create investor 
-server.post('/investors', async (request, reply) => {
-  try {
-    console.log(">>> in investors/create ...");
-    console.log(request.body);
-    const { investorId, investorName} = request.body as { investorId: string, investorName: string };
-    try {
-        const { rows } = await client.query('SELECT * FROM investors WHERE investorId = $1', [investorId])        
-        if (rows.length > 0){
-            console.log('account:', rows[0])
-            throw {status : 400 , message : 'Error investor already exist'}
-        }
-    } catch (error) {
-        console.error('Error investorId already exist :', error);
-        throw {status : 400 , message : 'Error investor already exist'}
-    }
-
-    await client.query(
-        `INSERT INTO investors (investorId, investorName) VALUES ($1, $2)`,
-        [investorId, investorName]
-    ); 
-    reply.send({ message: 'Data inserted successfully!' });
-  } catch (e) {
-    console.error(e);
-    console.error('Error writing data:', e);
     reply.status(400).send({ error: (e as Error).message });
   }
 });
@@ -142,17 +92,9 @@ server.post('/accounts', async (request, reply) => {
   try {
     console.log(">>> in accounts/create ...");
     console.log(request.body);
-    const { accountId, accountName, investorId} = request.body as { accountId: string, accountName: string, investorId: string };
-    
-    try {
-      const { rows } = await client.query('SELECT * FROM investors WHERE investorId = $1', [investorId])        
-      if (rows.length <= 0){          
-          throw {status : 400 , message : 'Please create investor account first'}
-      }
-  } catch (error) {
-      console.error('Error investorId does not exist :', error);
-      throw {status : 400 , message : 'Error investorId does not exist - Please create investor first'}
-  }
+    let { accountId, accountName, investorId, investorName, createdBy, metadata} = request.body as { accountId: string, accountName: string, investorId: string, investorName: string, createdBy: string, metadata: object };
+    metadata = metadata ?? {};
+    createdBy = createdBy ?? 'ADMIN'
 
     try {
         const { rows } = await client.query('SELECT * FROM accounts WHERE accountId = $1', [accountId])        
@@ -177,8 +119,9 @@ server.post('/accounts', async (request, reply) => {
         console.log(">>> saving new account to database ...");    
         // Execute a query to insert data into a table
         await client.query(
-        `INSERT INTO accounts (accountId, accountName, investorId, walletId, address) VALUES ($1, $2, $3, $4, $5)`,
-        [accountId, accountName, investorId, wallet.data.walletId, wallet.data.address]
+        //`INSERT INTO accounts (accountId, accountName, investorId, walletId, address) VALUES ($1, $2, $3, $4, $5)`,
+        `INSERT INTO accounts (accountId, accountName, investorId, investorName, walletId, address, createdBy, metadata) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+        [accountId, accountName, investorId, investorName, wallet.data.walletId, wallet.data.address, createdBy, metadata]
         );
 
     }catch(error){

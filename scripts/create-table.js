@@ -68,7 +68,7 @@ function createAccountTable() {
                 case 1:
                     _a.sent();
                     // Create the 'accounts' table
-                    return [4 /*yield*/, client.query("CREATE TABLE accounts (\n        accountId VARCHAR,\n        accountName VARCHAR,\n        investorId VARCHAR,\n        walletId VARCHAR,\n        address VARCHAR,\n        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n        PRIMARY KEY (accountId, investorId),\n        FOREIGN KEY (investorId) REFERENCES investors (investorId)        \n      )")];
+                    return [4 /*yield*/, client.query("CREATE TABLE accounts (\n        accountId VARCHAR NOT NULL,\n        accountName VARCHAR,\n        investorId VARCHAR,\n        investorName VARCHAR,\n        walletId VARCHAR,\n        address VARCHAR,\n        createdBy VARCHAR,\n        metadata JSONB NOT NULL,\n        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\n        PRIMARY KEY (accountId)       \n      )")];
                 case 2:
                     // Create the 'accounts' table
                     _a.sent();
@@ -91,7 +91,7 @@ function inserToAccountTable() {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
                     // inserToAccountTable
-                    return [4 /*yield*/, client.query("INSERT INTO accounts (accountId, investorId, accountName, walletId, address) VALUES ($1, $2, $3, $4, $5)", ['0001001', 'I0001001', 'acct1001', 'wallet1001', '0x012020fhe03999djs99k002920343jd'])];
+                    return [4 /*yield*/, client.query("INSERT INTO accounts (accountId, investorId, investorName, accountName, walletId, address, createdBy, metadata) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)", ['0001001', 'INV0001001', 'STT INVESTOR', 'acct1001', 'wallet1001', '0x012020fhe03999djs99k002920343jd', 'AUTO', { 'address': '3131 NE 188th' }])];
                 case 1:
                     // inserToAccountTable
                     _a.sent();
@@ -157,71 +157,12 @@ function inserToWalletTable() {
         });
     });
 }
-//Function to create the investor table
-function createInvestorTable() {
-    return __awaiter(this, void 0, void 0, function () {
-        var alterTableQuery, dropTableQuery, error_5;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    _a.trys.push([0, 4, , 5]);
-                    alterTableQuery = "ALTER TABLE accounts DROP CONSTRAINT accounts_investorid_fkey;";
-                    dropTableQuery = "DROP TABLE IF EXISTS investors;";
-                    return [4 /*yield*/, client.query(alterTableQuery)];
-                case 1:
-                    _a.sent();
-                    return [4 /*yield*/, client.query(dropTableQuery)];
-                case 2:
-                    _a.sent();
-                    return [4 /*yield*/, client.query("\n      CREATE TABLE investors (\n        investorId VARCHAR PRIMARY KEY,\n        investorName VARCHAR,\n        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\n      )")];
-                case 3:
-                    _a.sent();
-                    console.log('Investor table created successfully!');
-                    return [3 /*break*/, 5];
-                case 4:
-                    error_5 = _a.sent();
-                    console.error('Error creating investor table:', error_5);
-                    return [3 /*break*/, 5];
-                case 5: return [2 /*return*/];
-            }
-        });
-    });
-}
-function inserToInvestorTable() {
-    return __awaiter(this, void 0, void 0, function () {
-        var error_6;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    _a.trys.push([0, 2, , 3]);
-                    // inserToAccountTable
-                    return [4 /*yield*/, client.query("INSERT INTO investors (investorId, investorName) VALUES ($1, $2)", ['I0001001', 'inv1001'])];
-                case 1:
-                    // inserToAccountTable
-                    _a.sent();
-                    console.log('insert successfully!');
-                    return [3 /*break*/, 3];
-                case 2:
-                    error_6 = _a.sent();
-                    console.error('Error creating table:', error_6);
-                    return [3 /*break*/, 3];
-                case 3: return [2 /*return*/];
-            }
-        });
-    });
-}
 function runTableCreation() {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, createInvestorTable()];
+                case 0: return [4 /*yield*/, createAccountTable()];
                 case 1:
-                    _a.sent();
-                    return [4 /*yield*/, createAccountTable()];
-                case 2:
-                    _a.sent();
-                    return [4 /*yield*/, createWalletTable()];
-                case 3:
                     _a.sent();
                     return [2 /*return*/];
             }
@@ -232,14 +173,8 @@ function testTableInserts() {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, inserToInvestorTable()];
+                case 0: return [4 /*yield*/, inserToAccountTable()];
                 case 1:
-                    _a.sent();
-                    return [4 /*yield*/, inserToAccountTable()];
-                case 2:
-                    _a.sent();
-                    return [4 /*yield*/, inserToWalletTable()];
-                case 3:
                     _a.sent();
                     return [2 /*return*/];
             }

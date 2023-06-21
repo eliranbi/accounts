@@ -1,6 +1,5 @@
 {
   
-
   "swagger": "2.0",
   "info": {
       "description": "Accounts Resolution Services API",
@@ -133,81 +132,8 @@
                 }
             }
         }
-    },  
-    "/investors" : {
-        "post" : {
-            "summary" : "Create new investor",
-            "description": "Create new investor",
-            "tags": [
-              "Investors"
-            ],
-            "produces": ["application/json"],
-            "consumes": ["application/json"],
-            "parameters": [
-                {
-                    "in": "body",
-                    "name": "body",
-                    "description": "investor create object",
-                    "required": true,
-                    "schema": {
-                        "$ref": "#/definitions/investorRequestBody"                                                    
-                    }
-                }
-            ],
-            "responses": {
-                "200": {
-                    "description": "successful operation",
-                    "schema": {                        
-                            "$ref": "#/definitions/successfulResponse"                        
-                    }
-                },
-                "400": {
-                    "description": "Invalid status value",
-                    "schema": {
-                        "$ref": "#/definitions/invalidResponse"
-                    }
-                }
-            }
-        }
-    },
-    "/investors/{investorId}" : {
-        "get" : {
-            "summary" : "Get investor",
-            "description": "Get investor",
-            "tags": [
-              "Investors"
-            ],
-            "produces": ["application/json"],
-            "parameters": [
-                {
-                    "name": "investorId",
-                    "in": "path",
-                    "description": "InvestorId to get",
-                    "required": true,
-                    "type": "string",
-                    "example": "INV00019918321"
-                }                
-            ],
-            "responses": {
-                "200": {
-                    "description": "successful operation",
-                    "schema": {
-                        "type": "object",
-                        "items": {
-                            "$ref": "#/definitions/investor"
-                        }
-                    }
-                },
-                "400": {
-                    "description": "Invalid status value",
-                    "schema": {
-                        "$ref": "#/definitions/invalidResponse"
-                    }
-                }
-            }
-        }
-    },
-    "/investors/accounts/{investorId}" : {
+    },      
+    "/accounts/investors/{investorId}" : {
         "get" : {
             "summary" : "Get investor accounts",
             "description": "Get investor accounts",
@@ -251,19 +177,14 @@
             "accountId": { "type": "integer" },
             "accountName": { "type": "string" },
             "investorId": { "type": "string" },
+            "investorName": { "type": "string" },
+            "createdBy" :{ "type": "string" },
+            "metadata" : {"type" : "object"},
             "walletId": { "type": "string" },
             "address": { "type": "string" },
             "createAt": { "type": "string" }
         }
-    },
-    "investor": {
-        "type": "object",
-        "properties": {
-            "investorId": { "type": "integer" },
-            "investorName": { "type": "string" },
-            "createAt": { "type": "string" }
-        }
-    },
+    },    
     "accountRequestBody": {
         "x-name": "body", 
         "type": "object",
@@ -282,26 +203,18 @@
             "investorId": {
                 "type": "string",
                 "example": "INV00019918321"
-            }
-        }
-    },
-    "investorRequestBody": {
-        "x-name": "body", 
-        "type": "object",
-        "required": [
-          "investorId"          
-       ],
-        "properties": {
-            "investorId": {
-                "type": "string",
-                "example": "INV00019918321"
-            },
-            "investorName": {
+            },"investorName": {
                 "type": "string",
                 "example": "STT MMF Investor"
+            },"createdBy": {
+                "type": "string",
+                "example": "ADMIN"
+            },"metadata": {
+                "type": "object",
+                "example": {"address": "3131 NE 188th"}
             }
         }
-    },
+    },    
     "invalidResponse": {
         "type": "object",
         "properties": {

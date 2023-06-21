@@ -63,39 +63,9 @@ server.get('/ping', function (request, reply) { return __awaiter(void 0, void 0,
         return [2 /*return*/, { message: 'account services is up - ' + new Date() }];
     });
 }); });
-//Get - Investor information 
-server.get('/investors/:investorId', function (request, reply) { return __awaiter(void 0, void 0, void 0, function () {
-    var investorId, result, rows, e_1;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                _a.trys.push([0, 2, , 3]);
-                console.log(">>> in investors ...");
-                investorId = request.params.investorId;
-                console.log(request.params);
-                return [4 /*yield*/, client.query('SELECT * FROM investors WHERE investorId = $1', [investorId])];
-            case 1:
-                result = _a.sent();
-                rows = result.rows;
-                if (rows == null || rows.length <= 0) {
-                    throw { status: 400, message: 'Investor does not exist' };
-                }
-                console.log(rows);
-                reply.send(rows[0]);
-                return [3 /*break*/, 3];
-            case 2:
-                e_1 = _a.sent();
-                console.error('Error reading data:', e_1);
-                reply.status(400).send({ error: e_1.message });
-                return [3 /*break*/, 3];
-            case 3: return [2 /*return*/];
-        }
-    });
-}); });
 //GET - Investor accounts 
-// GET route to read data from PostgreSQL
 server.get('/investors/accounts/:investorId', function (request, reply) { return __awaiter(void 0, void 0, void 0, function () {
-    var investorId, result, rows, e_2;
+    var investorId, result, rows, e_1;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -114,57 +84,17 @@ server.get('/investors/accounts/:investorId', function (request, reply) { return
                 reply.send(rows);
                 return [3 /*break*/, 3];
             case 2:
-                e_2 = _a.sent();
-                console.error('Error reading data:', e_2);
-                reply.status(400).send({ error: e_2.message });
+                e_1 = _a.sent();
+                console.error('Error reading data:', e_1);
+                reply.status(400).send({ error: e_1.message });
                 return [3 /*break*/, 3];
             case 3: return [2 /*return*/];
         }
     });
 }); });
-//POST - Create investor 
-server.post('/investors', function (request, reply) { return __awaiter(void 0, void 0, void 0, function () {
-    var _a, investorId, investorName, rows, error_1, e_3;
-    return __generator(this, function (_b) {
-        switch (_b.label) {
-            case 0:
-                _b.trys.push([0, 6, , 7]);
-                console.log(">>> in investors/create ...");
-                console.log(request.body);
-                _a = request.body, investorId = _a.investorId, investorName = _a.investorName;
-                _b.label = 1;
-            case 1:
-                _b.trys.push([1, 3, , 4]);
-                return [4 /*yield*/, client.query('SELECT * FROM investors WHERE investorId = $1', [investorId])];
-            case 2:
-                rows = (_b.sent()).rows;
-                if (rows.length > 0) {
-                    console.log('account:', rows[0]);
-                    throw { status: 400, message: 'Error investor already exist' };
-                }
-                return [3 /*break*/, 4];
-            case 3:
-                error_1 = _b.sent();
-                console.error('Error investorId already exist :', error_1);
-                throw { status: 400, message: 'Error investor already exist' };
-            case 4: return [4 /*yield*/, client.query("INSERT INTO investors (investorId, investorName) VALUES ($1, $2)", [investorId, investorName])];
-            case 5:
-                _b.sent();
-                reply.send({ message: 'Data inserted successfully!' });
-                return [3 /*break*/, 7];
-            case 6:
-                e_3 = _b.sent();
-                console.error(e_3);
-                console.error('Error writing data:', e_3);
-                reply.status(400).send({ error: e_3.message });
-                return [3 /*break*/, 7];
-            case 7: return [2 /*return*/];
-        }
-    });
-}); });
 // GET route to read data from PostgreSQL
 server.get('/accounts/:accountId', function (request, reply) { return __awaiter(void 0, void 0, void 0, function () {
-    var accountId, result, rows, e_4;
+    var accountId, result, rows, e_2;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -183,84 +113,75 @@ server.get('/accounts/:accountId', function (request, reply) { return __awaiter(
                 reply.send(rows[0]);
                 return [3 /*break*/, 3];
             case 2:
-                e_4 = _a.sent();
-                console.error('Error reading data:', e_4);
-                reply.status(400).send({ error: e_4.message });
+                e_2 = _a.sent();
+                console.error('Error reading data:', e_2);
+                reply.status(400).send({ error: e_2.message });
                 return [3 /*break*/, 3];
             case 3: return [2 /*return*/];
         }
     });
 }); });
-// POST route to write data to PostgreSQL
+// POST - Create an account
 server.post('/accounts', function (request, reply) { return __awaiter(void 0, void 0, void 0, function () {
-    var _a, accountId, accountName, investorId, rows, error_2, rows, error_3, wallet, error_4, e_5;
+    var _a, accountId, accountName, investorId, investorName, createdBy, metadata, rows, error_1, wallet, error_2, e_3;
     return __generator(this, function (_b) {
         switch (_b.label) {
             case 0:
-                _b.trys.push([0, 13, , 14]);
+                _b.trys.push([0, 10, , 11]);
                 console.log(">>> in accounts/create ...");
                 console.log(request.body);
-                _a = request.body, accountId = _a.accountId, accountName = _a.accountName, investorId = _a.investorId;
+                _a = request.body, accountId = _a.accountId, accountName = _a.accountName, investorId = _a.investorId, investorName = _a.investorName, createdBy = _a.createdBy, metadata = _a.metadata;
+                metadata = metadata !== null && metadata !== void 0 ? metadata : {};
+                createdBy = createdBy !== null && createdBy !== void 0 ? createdBy : 'ADMIN';
                 _b.label = 1;
             case 1:
                 _b.trys.push([1, 3, , 4]);
-                return [4 /*yield*/, client.query('SELECT * FROM investors WHERE investorId = $1', [investorId])];
-            case 2:
-                rows = (_b.sent()).rows;
-                if (rows.length <= 0) {
-                    throw { status: 400, message: 'Please create investor account first' };
-                }
-                return [3 /*break*/, 4];
-            case 3:
-                error_2 = _b.sent();
-                console.error('Error investorId does not exist :', error_2);
-                throw { status: 400, message: 'Error investorId does not exist - Please create investor first' };
-            case 4:
-                _b.trys.push([4, 6, , 7]);
                 return [4 /*yield*/, client.query('SELECT * FROM accounts WHERE accountId = $1', [accountId])];
-            case 5:
+            case 2:
                 rows = (_b.sent()).rows;
                 if (rows.length > 0) {
                     console.log('account:', rows[0]);
                     throw { status: 400, message: 'Error account already exist' };
                 }
-                return [3 /*break*/, 7];
-            case 6:
-                error_3 = _b.sent();
-                console.error('Error account already exist :', error_3);
+                return [3 /*break*/, 4];
+            case 3:
+                error_1 = _b.sent();
+                console.error('Error account already exist :', error_1);
                 throw { status: 400, message: 'Error account already exist' };
-            case 7:
+            case 4:
                 // Call wallet api to get walletId and address ... 
                 console.log(">>> calling wallet services ...");
                 console.log(WALLET_SERVICES_URL);
-                _b.label = 8;
-            case 8:
-                _b.trys.push([8, 11, , 12]);
+                _b.label = 5;
+            case 5:
+                _b.trys.push([5, 8, , 9]);
                 return [4 /*yield*/, axios_1.default.post(WALLET_SERVICES_URL, {})];
-            case 9:
+            case 6:
                 wallet = _b.sent();
                 console.log(wallet.data);
                 console.log(">>> saving new account to database ...");
                 // Execute a query to insert data into a table
-                return [4 /*yield*/, client.query("INSERT INTO accounts (accountId, accountName, investorId, walletId, address) VALUES ($1, $2, $3, $4, $5)", [accountId, accountName, investorId, wallet.data.walletId, wallet.data.address])];
-            case 10:
+                return [4 /*yield*/, client.query(
+                    //`INSERT INTO accounts (accountId, accountName, investorId, walletId, address) VALUES ($1, $2, $3, $4, $5)`,
+                    "INSERT INTO accounts (accountId, accountName, investorId, investorName, walletId, address, createdBy, metadata) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)", [accountId, accountName, investorId, investorName, wallet.data.walletId, wallet.data.address, createdBy, metadata])];
+            case 7:
                 // Execute a query to insert data into a table
                 _b.sent();
-                return [3 /*break*/, 12];
-            case 11:
-                error_4 = _b.sent();
-                console.error('Error creatting wallet:', error_4);
+                return [3 /*break*/, 9];
+            case 8:
+                error_2 = _b.sent();
+                console.error('Error creatting wallet:', error_2);
                 throw { status: 400, message: 'Error creatting wallet' };
-            case 12:
+            case 9:
                 reply.send({ message: 'Data inserted successfully!' });
-                return [3 /*break*/, 14];
-            case 13:
-                e_5 = _b.sent();
-                console.error(e_5);
-                console.error('Error writing data:', e_5);
-                reply.status(400).send({ error: e_5.message });
-                return [3 /*break*/, 14];
-            case 14: return [2 /*return*/];
+                return [3 /*break*/, 11];
+            case 10:
+                e_3 = _b.sent();
+                console.error(e_3);
+                console.error('Error writing data:', e_3);
+                reply.status(400).send({ error: e_3.message });
+                return [3 /*break*/, 11];
+            case 11: return [2 /*return*/];
         }
     });
 }); });
